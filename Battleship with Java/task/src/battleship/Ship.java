@@ -23,7 +23,7 @@ class Ship {
 
     private void initVertically(Coordinate start, Coordinate end) {
         int length = 1 + Math.abs(start.row() - end.row());
-        assert(length == shipType.length);
+        assert (length == shipType.length);
         parts = new Coordinate[length];
         if (start.row() < end.row()) {
             for (int i = 0; i < length; i++) {
@@ -38,7 +38,7 @@ class Ship {
 
     private void initHorizontally(Coordinate start, Coordinate end) {
         int length = 1 + Math.abs(start.col() - end.col());
-        assert(length == shipType.length);
+        assert (length == shipType.length);
         parts = new Coordinate[length];
         if (start.col() < end.col()) {
             for (int i = 0; i < length; i++) {
@@ -54,8 +54,8 @@ class Ship {
     boolean collides(List<Ship> shipList) {
         for (Ship otherShip : shipList) {
             for (Coordinate otherPart : otherShip.parts) {
-                for (Coordinate part: parts) {
-                    if (part.equals(otherPart) || part.adjacent(otherPart)) {
+                for (Coordinate part : parts) {
+                    if (part.equals(otherPart) || part.isAdjacent(otherPart)) {
                         return true;
                     }
                 }
@@ -70,7 +70,6 @@ class Ship {
         for (Coordinate part : parts) {
             result.append(part).append(" ");
         }
-        return  result.toString();
+        return result.toString();
     }
-
 }

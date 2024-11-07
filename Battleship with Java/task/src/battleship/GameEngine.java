@@ -1,14 +1,16 @@
 package battleship;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
-class Game {
+class GameEngine {
     private static final int MAXSHIPS = 5;
     String[][] board;
     List<Ship> ships = new ArrayList<>(MAXSHIPS);
-    Game() {
+    Set<Coordinate> shipPositions = new HashSet<>();
+    Set<Coordinate> receivedShots = new HashSet<>();
+
+    GameEngine() {
         initBoard();
     }
 
@@ -16,12 +18,12 @@ class Game {
         board = new String[11][11];
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
-                if (i==0 && j==0){
+                if (i == 0 && j == 0) {
                     board[i][j] = " ";
-                } else if (i == 0){
+                } else if (i == 0) {
                     board[i][j] = String.valueOf(j);
-                } else if (j == 0){
-                    board[i][j] = Character.toString('A'+ i-1);
+                } else if (j == 0) {
+                    board[i][j] = Character.toString('A' + i - 1);
                 } else {
                     board[i][j] = "~";
                 }
@@ -29,7 +31,7 @@ class Game {
         }
     }
 
-    void printBoard(){
+    void printBoard() {
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 System.out.print(board[i][j] + " ");
@@ -38,9 +40,7 @@ class Game {
         }
     }
 
-    boolean setShip(ShipType shipType, String[] coordinates) {
-        Coordinate start = Coordinate.fromString(coordinates[0]);
-        Coordinate end = Coordinate.fromString(coordinates[1]);
+    boolean setShip(ShipType shipType, Coordinate start, Coordinate end) {
         if (!isLocationOk(start, end)) {
             System.out.println("Error! Wrong ship location! Try again:");
             return false;
@@ -51,18 +51,19 @@ class Game {
             return false;
         }
         Ship newShip = new Ship(shipType, start, end);
-        if (newShip.collides(ships)){
+        if (newShip.collides(ships)) {
             System.out.println("Error! Collision! Try again:");
             return false;
         }
         ships.add(newShip);
+        shipPositions.addAll(Arrays.asList(newShip.parts));
         markOnBoard(newShip);
         return true;
     }
 
     private void markOnBoard(Ship ship) {
         for (Coordinate part : ship.parts) {
-            board[(part.row() - 'A' + 1)][part.col()] = "O";
+            board[(part.getRowIndex())][part.col()] = "O";
         }
         printBoard();
     }
@@ -75,4 +76,14 @@ class Game {
         return start != null && end != null && start.isInLineWith(end);
     }
 
+    public boolean tryShot(Coordinate target) {
+        receivedShots.add(target);
+        if (shipPositions.contains(target)) {
+            board[target.getRowIndex()][target.col()] = "X";
+            return true;
+        } else {
+            board[target.getRowIndex()][target.col()] = "M";
+            return false;
+        }
+    }
 }

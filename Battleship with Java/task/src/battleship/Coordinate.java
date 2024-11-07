@@ -5,8 +5,17 @@ record Coordinate(Character row, int col) {
         return row >= 'A' && row <= 'J' && col >= 1 && col <= 10;
     }
 
+    int getRowIndex() {
+        return row - 'A' + 1;
+    }
+
     Boolean isInLineWith(Coordinate other) {
         return other.row == row || other.col == col;
+    }
+
+    public boolean isAdjacent(Coordinate other) {
+        return (Math.abs(row - other.row) == 1 && col == other.col) ||
+                (Math.abs(col - other.col) == 1 && row == other.row);
     }
 
     static Coordinate fromString(String inString) {
@@ -27,10 +36,5 @@ record Coordinate(Character row, int col) {
     @Override
     public String toString() {
         return row + String.valueOf(col);
-    }
-
-    public boolean adjacent(Coordinate other) {
-        return (Math.abs(row - other.row) == 1 && col == other.col) ||
-                (Math.abs(col - other.col) == 1 && row == other.row);
     }
 }

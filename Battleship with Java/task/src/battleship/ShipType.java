@@ -14,5 +14,4 @@ enum ShipType {
         this.length = length;
         this.name = name;
     }
-
 }

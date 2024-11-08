@@ -1,6 +1,6 @@
 package battleship;
 
-record Coordinate(Character row, int col) {
+record Coordinate(char row, int col) {
     Boolean exists() {
         return row >= 'A' && row <= 'J' && col >= 1 && col <= 10;
     }
@@ -19,7 +19,7 @@ record Coordinate(Character row, int col) {
     }
 
     static Coordinate fromString(String inString) {
-        Character row = inString.charAt(0);
+        char row = inString.charAt(0);
         int col;
         try {
             col = Integer.parseInt(inString.substring(1));
@@ -36,5 +36,20 @@ record Coordinate(Character row, int col) {
     @Override
     public String toString() {
         return row + String.valueOf(col);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Coordinate that)) return false;
+
+        return col == that.col && row == that.row;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = row;
+        result = 31 * result + col;
+        return result;
     }
 }

@@ -1,14 +1,16 @@
 package battleship;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 
-class GameEngine {
-    private static final int MAX_SHIPS = 5;
-    String[][] board;
-    List<Ship> ships = new ArrayList<>(MAX_SHIPS);
+class BattleField {
+    Logger logger = Logger.getLogger(BattleField.class.getName());
+    private String[][] board;
+    private final List<Ship> ships = new ArrayList<>();
+    private final Map<Coordinate, Ship> shipCoordinates = new HashMap<>();
 
-    GameEngine() {
+    BattleField() {
         initBoard();
     }
 
@@ -33,6 +35,7 @@ class GameEngine {
     }
 
     void printFogged() {
+        System.out.println();
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 if (board[i][j].equals(BoardContent.WATER.symbol)
@@ -44,6 +47,7 @@ class GameEngine {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     void printRevealed() {
@@ -71,12 +75,14 @@ class GameEngine {
             return false;
         }
         ships.add(newShip);
+        newShip.getParts().forEach(part -> shipCoordinates.put(part, newShip));
+        logger.info(shipCoordinates.toString());
         markOnBoard(newShip);
         return true;
     }
 
     private void markOnBoard(Ship ship) {
-        for (Coordinate part : ship.parts) {
+        for (Coordinate part : ship.getParts()) {
             board[(part.getRowIndex())][part.col()] = BoardContent.SHIP.symbol;
         }
         printRevealed();
@@ -90,13 +96,38 @@ class GameEngine {
         return start != null && end != null && start.isInLineWith(end);
     }
 
-    public boolean tryShot(Coordinate target) {
-        if (board[target.getRowIndex()][target.col()].equals(BoardContent.SHIP.symbol)) {
-            board[target.getRowIndex()][target.col()] = BoardContent.HIT.symbol;
-            return true;
-        } else {
+    public ShotResult tryShot(Coordinate target) {
+        ShotResult feedback;
+        String cellContent = board[target.getRowIndex()][target.col()];
+        if (cellContent.equals(BoardContent.WATER.symbol) || cellContent.equals(BoardContent.MISS.symbol)) {
             board[target.getRowIndex()][target.col()] = BoardContent.MISS.symbol;
-            return false;
+            feedback = ShotResult.MISS;
+        } else {
+            board[target.getRowIndex()][target.col()] = BoardContent.HIT.symbol;
+            Ship hitShip = shipCoordinates.get(target);
+            boolean isAfloat = hitShip.setDamaged(target);
+            if (isAfloat) {
+                feedback = ShotResult.HIT;
+            } else {
+                ships.remove(hitShip);
+                if (ships.isEmpty()) {
+                    feedback = ShotResult.SINK_LAST;
+                } else {
+                    feedback = ShotResult.SINK;
+                }
+            }
+        }
+        return feedback;
+    }
+
+    enum ShotResult {
+        HIT("You hit a ship!"),
+        MISS("You missed!"),
+        SINK("You sank a ship!"),
+        SINK_LAST("You sank the last ship.");
+        final String feedback;
+        ShotResult(String feedback) {
+            this.feedback = feedback;
         }
     }
 

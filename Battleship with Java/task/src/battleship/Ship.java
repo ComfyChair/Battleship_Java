@@ -1,12 +1,13 @@
 package battleship;
 
-import java.util.List;
-import java.util.logging.Logger;
+import java.util.*;
 
 class Ship {
-    Logger logger = Logger.getLogger(Ship.class.getName());
-    ShipType shipType;
-    Coordinate[] parts;
+    private final ShipType shipType;
+    /**
+     * Map representing state of ship parts: true means functional, false damaged
+     */
+    private final Map<Coordinate, Boolean> parts = new HashMap<>();
 
     Ship(ShipType shipType, Coordinate start, Coordinate end) {
         this.shipType = shipType;
@@ -24,14 +25,13 @@ class Ship {
     private void initVertically(Coordinate start, Coordinate end) {
         int length = 1 + Math.abs(start.row() - end.row());
         assert (length == shipType.length);
-        parts = new Coordinate[length];
         if (start.row() < end.row()) {
             for (int i = 0; i < length; i++) {
-                parts[i] = new Coordinate((char) (start.row() + i), start.col());
+                parts.put(new Coordinate((char) (start.row() + i), start.col()), true);
             }
         } else {
             for (int i = 0; i < length; i++) {
-                parts[i] = new Coordinate((char) (start.row() - i), start.col());
+                parts.put(new Coordinate((char) (start.row() - i), start.col()), true);
             }
         }
     }
@@ -39,22 +39,21 @@ class Ship {
     private void initHorizontally(Coordinate start, Coordinate end) {
         int length = 1 + Math.abs(start.col() - end.col());
         assert (length == shipType.length);
-        parts = new Coordinate[length];
         if (start.col() < end.col()) {
             for (int i = 0; i < length; i++) {
-                parts[i] = new Coordinate(start.row(), start.col() + i);
+                parts.put(new Coordinate(start.row(), start.col() + i), true);
             }
         } else {
             for (int i = 0; i < length; i++) {
-                parts[i] = new Coordinate(start.row(), start.col() - i);
+                parts.put(new Coordinate(start.row(), start.col() - i), true);
             }
         }
     }
 
-    boolean collides(List<Ship> shipList) {
-        for (Ship otherShip : shipList) {
-            for (Coordinate otherPart : otherShip.parts) {
-                for (Coordinate part : parts) {
+    boolean collides(List<Ship> shipSet) {
+        for (Ship otherShip : shipSet) {
+            for (Coordinate otherPart : otherShip.parts.keySet()) {
+                for (Coordinate part : parts.keySet()) {
                     if (part.equals(otherPart) || part.isAdjacent(otherPart)) {
                         return true;
                     }
@@ -64,12 +63,26 @@ class Ship {
         return false;
     }
 
+    public Set<Coordinate> getParts() {
+        return parts.keySet();
+    }
+
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for (Coordinate part : parts) {
+        StringBuilder result = new StringBuilder("Ship(");
+        for (Coordinate part : parts.keySet()) {
             result.append(part).append(" ");
         }
+        result.append(")");
         return result.toString();
+    }
+
+    /**
+     * @param target coordinate where the ship was hit
+     * @return true if any part of the ship is undamaged, false otherwise
+     */
+    public boolean setDamaged(Coordinate target) {
+        parts.replace(target, false);
+        return parts.containsValue(true);
     }
 }

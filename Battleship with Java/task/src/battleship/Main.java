@@ -6,15 +6,15 @@ public class Main {
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
-        gameEngine.printBoard();
-        getShipCoordinates(gameEngine);
+        gameEngine.printRevealed();
+        readShipCoordinates(gameEngine);
         startGame(gameEngine);
     }
 
     private static void startGame(GameEngine gameEngine) {
         System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("The game starts!");
-        gameEngine.printBoard();
+        gameEngine.printFogged();
         System.out.println("Take a shot!");
         Coordinate target = null;
         while (target == null) {
@@ -25,12 +25,13 @@ public class Main {
             }
         }
         boolean isHit = gameEngine.tryShot(target);
-        gameEngine.printBoard();
+        gameEngine.printFogged();
         String feedback = isHit ? "You hit a ship!" : "You missed!";
         System.out.println(feedback);
+        gameEngine.printRevealed();
     }
 
-    private static void getShipCoordinates(GameEngine gameEngine) {
+    private static void readShipCoordinates(GameEngine gameEngine) {
         Scanner scanner = new Scanner(System.in);
         for (ShipType shipType : ShipType.values()) {
             System.out.printf("\nEnter the coordinates of the %s (%d cells): %n", shipType.name, shipType.length);
